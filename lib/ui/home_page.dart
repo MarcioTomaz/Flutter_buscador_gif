@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -25,7 +26,7 @@ class _HomePageState extends State<HomePage> {
     String _urlSearch = "https://api.giphy.com/v1/gifs/search?api_key=R3I8B9TTW"
         "4tarBbkOBD0U47I72c4ChDq&q=$_search&limit=20&offset=$_offSet&rating=g&lang=en";
 
-    if(_search == null){
+    if(_search != null){
       response = await http.get(Uri.parse(_urlTrending));
     }else {
       response = await http.get(Uri.parse(_urlSearch));
@@ -62,9 +63,51 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(color: Colors.white,fontSize: 18.0),
               textAlign: TextAlign.center,
             ),
-           )
+           ),
+           Expanded(
+               child: FutureBuilder(
+                 future: _getGif(),
+                 builder: (context,snapshot){
+                  switch(snapshot.connectionState){
+                    case ConnectionState.waiting:
+                    case ConnectionState.none:
+                      return Container(
+                        width: 200.0,
+                        height: 200.0,
+                        alignment: Alignment.center,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 5.0,
+
+                        ),
+                      );
+                    default:
+                      if(snapshot.hasError) return Container();
+                      else return _createGifTable(context,snapshot);
+                  }
+                 }
+               ),
+           ),
          ],
       ),
+    );
+  }
+  Widget _createGifTable(BuildContext context, AsyncSnapshot snapshot){
+    return GridView.builder(
+      padding: EdgeInsets.all(10.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount:2,
+          crossAxisSpacing: 10.0,
+          mainAxisSpacing: 10.0,
+      ),
+      itemCount: snapshot.data["data"].length,
+      itemBuilder: (context,index){
+        return GestureDetector(
+          child: Image.network(snapshot.data["data"][index]["images"]["fixed_height"]["url"],
+            fit: BoxFit.cover,
+          ),
+        );
+      }
     );
   }
 }
