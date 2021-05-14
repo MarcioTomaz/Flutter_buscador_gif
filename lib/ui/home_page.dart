@@ -4,6 +4,8 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_buscador_gifs/ui/gif_page.dart';
+
 
 class HomePage extends StatefulWidget {
   @override
@@ -129,6 +131,12 @@ class _HomePageState extends State<HomePage> {
                 snapshot.data["data"][index]["images"]["fixed_height"]["url"],
                 fit: BoxFit.cover,
               ),
+              onTap: (){
+                Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => GifPage(
+                    snapshot.data["data"][index]))
+                );
+              },
             );
           else {
             return Container(
